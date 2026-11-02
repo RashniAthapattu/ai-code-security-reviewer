@@ -7,6 +7,7 @@ dependencies = [
     "fastapi>=0.115",
     "uvicorn[standard]>=0.30",
     "bandit>=1.7",
+    "semgrep>=1.80",
 ]
 
 [project.optional-dependencies]

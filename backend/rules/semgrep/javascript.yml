@@ -1,0 +1,134 @@
+rules:
+  - id: js-eval
+    languages: [javascript, typescript]
+    severity: ERROR
+    message: >-
+      eval() runs any text it is given as code. If that text can be influenced
+      by a user, they can run their own code in your app.
+    pattern: eval(...)
+    metadata:
+      title: Use of eval
+      cwe: ["CWE-95: Improper Neutralization of Directives in Dynamically Evaluated Code"]
+      confidence: HIGH
+      references: ["https://owasp.org/www-community/attacks/Code_Injection"]
+
+  - id: js-function-constructor
+    languages: [javascript, typescript]
+    severity: ERROR
+    message: >-
+      new Function() builds code from a string, just like eval(). Avoid it for
+      anything that includes outside input.
+    pattern: new Function(...)
+    metadata:
+      title: Code built with the Function constructor
+      cwe: ["CWE-95: Improper Neutralization of Directives in Dynamically Evaluated Code"]
+      confidence: HIGH
+      references: ["https://owasp.org/www-community/attacks/Code_Injection"]
+
+  - id: js-innerhtml-assignment
+    languages: [javascript, typescript]
+    severity: WARNING
+    message: >-
+      Setting innerHTML to a non-constant value can let an attacker inject
+      scripts (cross-site scripting). Use textContent, or sanitise the HTML first.
+    patterns:
+      - pattern: $EL.innerHTML = $VALUE
+      - pattern-not: $EL.innerHTML = "..."
+    metadata:
+      title: Unsafe innerHTML assignment
+      cwe: ["CWE-79: Improper Neutralization of Input During Web Page Generation ('Cross-site Scripting')"]
+      confidence: MEDIUM
+      references: ["https://owasp.org/www-community/attacks/xss/"]
+
+  - id: js-document-write
+    languages: [javascript, typescript]
+    severity: WARNING
+    message: >-
+      document.write() inserts raw HTML into the page and is a common route for
+      cross-site scripting.
+    pattern: document.write(...)
+    metadata:
+      title: Use of document.write
+      cwe: ["CWE-79: Improper Neutralization of Input During Web Page Generation ('Cross-site Scripting')"]
+      confidence: MEDIUM
+      references: ["https://owasp.org/www-community/attacks/xss/"]
+
+  - id: js-child-process-exec
+    languages: [javascript, typescript]
+    severity: ERROR
+    message: >-
+      exec() passes a string to the system shell. If any part of it comes from a
+      user, they can run their own commands. Use execFile() with an argument list.
+    patterns:
+      - pattern-either:
+          - pattern: child_process.exec($CMD, ...)
+          - pattern: exec($CMD, ...)
+      - pattern-not: child_process.exec("...", ...)
+      - pattern-not: exec("...", ...)
+    metadata:
+      title: Shell command built from a variable
+      cwe: ["CWE-78: Improper Neutralization of Special Elements used in an OS Command ('OS Command Injection')"]
+      confidence: HIGH
+      references: ["https://owasp.org/www-community/attacks/Command_Injection"]
+
+  - id: js-sql-string-building
+    languages: [javascript, typescript]
+    severity: ERROR
+    message: >-
+      This SQL query is built by joining strings together. A user can change the
+      meaning of the query (SQL injection). Use parameterised queries instead.
+    pattern-either:
+      - pattern: $DB.query("..." + $X, ...)
+      - pattern: $DB.query(`...${$X}...`, ...)
+    metadata:
+      title: SQL query built from strings
+      cwe: ["CWE-89: Improper Neutralization of Special Elements used in an SQL Command ('SQL Injection')"]
+      confidence: MEDIUM
+      references: ["https://owasp.org/www-community/attacks/SQL_Injection"]
+
+  - id: js-hardcoded-secret
+    languages: [javascript, typescript]
+    severity: WARNING
+    message: >-
+      A password, key or token appears to be written directly in the code. Anyone
+      who can read the code can read the secret. Load it from an environment
+      variable instead.
+    patterns:
+      - pattern: $V = "..."
+      - metavariable-regex:
+          metavariable: $V
+          regex: (?i).*(password|passwd|secret|api_?key|token).*
+      - pattern-not: $V = ""
+    metadata:
+      title: Hard-coded secret
+      cwe: ["CWE-798: Use of Hard-coded Credentials"]
+      confidence: MEDIUM
+      references: ["https://owasp.org/www-community/vulnerabilities/Use_of_hard-coded_password"]
+
+  - id: js-tls-verification-disabled
+    languages: [javascript, typescript]
+    severity: WARNING
+    message: >-
+      Turning off certificate checks lets an attacker impersonate the server
+      (man-in-the-middle attack).
+    pattern: "{..., rejectUnauthorized: false, ...}"
+    metadata:
+      title: TLS certificate verification disabled
+      cwe: ["CWE-295: Improper Certificate Validation"]
+      confidence: HIGH
+      references: ["https://owasp.org/www-project-top-ten/2017/A6_2017-Security_Misconfiguration"]
+
+  - id: js-weak-hash
+    languages: [javascript, typescript]
+    severity: WARNING
+    message: >-
+      MD5 and SHA-1 are broken for security purposes. Use SHA-256 or stronger, and
+      a dedicated algorithm such as bcrypt or argon2 for passwords.
+    pattern-either:
+      - pattern: $C.createHash("md5")
+      - pattern: $C.createHash("sha1")
+    metadata:
+      title: Weak hash algorithm
+      cwe: ["CWE-327: Use of a Broken or Risky Cryptographic Algorithm"]
+      confidence: HIGH
+      references: ["https://owasp.org/Top10/A02_2021-Cryptographic_Failures/"]
