@@ -1,7 +1,7 @@
 from fastapi import FastAPI, HTTPException
 
 from app.models import ScanRequest, ScanResult
-from app.scanners.bandit_scanner import ScannerError, scan_python
+from app.scanners import ScannerError, scan_code
 
 app = FastAPI(
     title="AI Code Security Reviewer",
@@ -23,6 +23,6 @@ def scan(request: ScanRequest) -> ScanResult:
     The code is analysed statically and is never executed.
     """
     try:
-        return scan_python(request.code)
+        return scan_code(request.code, request.language)
     except ScannerError as exc:
         raise HTTPException(status_code=503, detail=str(exc)) from exc

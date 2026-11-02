@@ -7,6 +7,9 @@ from pydantic import BaseModel, Field
 MAX_CODE_LENGTH = 100_000
 
 
+Language = Literal["python", "javascript", "typescript"]
+
+
 class Severity(str, Enum):
     LOW = "low"
     MEDIUM = "medium"
@@ -15,7 +18,7 @@ class Severity(str, Enum):
 
 class ScanRequest(BaseModel):
     code: str = Field(min_length=1, max_length=MAX_CODE_LENGTH)
-    language: Literal["python"] = "python"
+    language: Language = "python"
 
 
 class Finding(BaseModel):

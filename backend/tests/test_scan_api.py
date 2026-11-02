@@ -20,6 +20,16 @@ def test_scan_returns_findings():
     assert finding["line"] == 2
 
 
+def test_scan_javascript_uses_semgrep():
+    response = client.post(
+        "/scan", json={"code": "eval(userInput);\n", "language": "javascript"}
+    )
+
+    assert response.status_code == 200
+    findings = response.json()["findings"]
+    assert [(f["scanner"], f["rule_id"]) for f in findings] == [("semgrep", "js-eval")]
+
+
 def test_scan_of_clean_code_returns_no_findings():
     response = client.post("/scan", json={"code": "print('hello')\n"})
 
@@ -46,10 +56,10 @@ def test_unsupported_language_is_rejected():
 
 
 def test_scanner_failure_returns_503(monkeypatch):
-    def broken_scan(code):
+    def broken_scan(code, language):
         raise ScannerError("Bandit took too long and was stopped")
 
-    monkeypatch.setattr("app.main.scan_python", broken_scan)
+    monkeypatch.setattr("app.main.scan_code", broken_scan)
 
     response = client.post("/scan", json={"code": "print(1)"})
 
