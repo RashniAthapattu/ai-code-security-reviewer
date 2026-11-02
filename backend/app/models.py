@@ -1,4 +1,5 @@
 from enum import Enum
+from typing import Literal
 
 from pydantic import BaseModel, Field
 
@@ -10,6 +11,11 @@ class Severity(str, Enum):
     LOW = "low"
     MEDIUM = "medium"
     HIGH = "high"
+
+
+class ScanRequest(BaseModel):
+    code: str = Field(min_length=1, max_length=MAX_CODE_LENGTH)
+    language: Literal["python"] = "python"
 
 
 class Finding(BaseModel):
