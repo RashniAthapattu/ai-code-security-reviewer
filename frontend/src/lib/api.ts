@@ -33,6 +33,9 @@ async function errorMessage(response: Response): Promise<string> {
   if (response.status === 422) {
     return "The code could not be scanned. It may be empty or too long.";
   }
+  if (response.status === 429) {
+    return "You have scanned a lot in a short time. Please wait a while and try again.";
+  }
   if (response.status === 503) {
     return "The scanner is not available right now. Please try again later.";
   }

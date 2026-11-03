@@ -50,6 +50,7 @@ describe("scanCode", () => {
 
   it.each([
     [422, "could not be scanned"],
+    [429, "wait a while"],
     [503, "not available"],
     [500, "(500)"],
   ])("gives a friendly message for status %i", async (status, text) => {

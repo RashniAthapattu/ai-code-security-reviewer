@@ -47,3 +47,38 @@ def test_bad_limits_fall_back_to_the_default(monkeypatch):
         monkeypatch.setenv("MAX_EXPLAINED_FINDINGS", bad)
 
         assert get_settings().max_explained_findings == 20
+
+
+def test_demo_limits_have_safe_defaults(monkeypatch):
+    for name in ("RATE_LIMIT_PER_HOUR", "AI_RATE_LIMIT_PER_HOUR", "AI_MAX_CODE_LENGTH"):
+        monkeypatch.delenv(name, raising=False)
+
+    settings = get_settings()
+
+    assert settings.rate_limit_per_hour == 60
+    assert settings.ai_rate_limit_per_hour == 10
+    assert settings.ai_max_code_length == 20_000
+
+
+def test_demo_limits_can_be_set_and_zero_means_no_limit(monkeypatch):
+    monkeypatch.setenv("RATE_LIMIT_PER_HOUR", "0")
+    monkeypatch.setenv("AI_RATE_LIMIT_PER_HOUR", "5")
+    monkeypatch.setenv("AI_MAX_CODE_LENGTH", "1000")
+
+    settings = get_settings()
+
+    assert settings.rate_limit_per_hour == 0
+    assert settings.ai_rate_limit_per_hour == 5
+    assert settings.ai_max_code_length == 1000
+
+
+def test_bad_limit_values_fall_back_to_defaults(monkeypatch):
+    monkeypatch.setenv("RATE_LIMIT_PER_HOUR", "-3")
+    monkeypatch.setenv("AI_RATE_LIMIT_PER_HOUR", "lots")
+    monkeypatch.setenv("AI_MAX_CODE_LENGTH", "0")
+
+    settings = get_settings()
+
+    assert settings.rate_limit_per_hour == 60
+    assert settings.ai_rate_limit_per_hour == 10
+    assert settings.ai_max_code_length == 20_000
