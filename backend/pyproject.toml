@@ -23,6 +23,9 @@ include = ["app*"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
+pythonpath = ["."]
 
 [tool.ruff]
 line-length = 88
+# The samples are insecure on purpose
+extend-exclude = ["samples"]
