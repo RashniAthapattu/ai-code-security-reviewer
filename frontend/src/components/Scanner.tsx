@@ -4,6 +4,7 @@ import { useState } from "react";
 
 import FindingCard from "@/components/FindingCard";
 import { ScanError, scanCode } from "@/lib/api";
+import { EXAMPLES, MAX_CODE_LENGTH } from "@/lib/examples";
 import { aiNotice, sortBySeverity, summaryText } from "@/lib/summary";
 import type { Language, ScanResult } from "@/lib/types";
 
@@ -20,6 +21,14 @@ export default function Scanner() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [result, setResult] = useState<ScanResult | null>(null);
+
+  const tooLong = code.length > MAX_CODE_LENGTH;
+
+  function loadExample() {
+    setCode(EXAMPLES[language]);
+    setResult(null);
+    setError(null);
+  }
 
   async function handleScan() {
     setLoading(true);
@@ -77,13 +86,28 @@ export default function Scanner() {
 
         <button
           type="button"
+          onClick={loadExample}
+          className="text-sm underline"
+        >
+          Try an example
+        </button>
+
+        <button
+          type="button"
           onClick={handleScan}
-          disabled={loading || code.trim() === ""}
+          disabled={loading || tooLong || code.trim() === ""}
           className="ml-auto rounded-md bg-zinc-900 px-5 py-2 text-sm font-medium text-white hover:bg-zinc-700 disabled:opacity-50 dark:bg-zinc-100 dark:text-zinc-900 dark:hover:bg-zinc-300"
         >
           {loading ? "Scanning..." : "Scan"}
         </button>
       </div>
+
+      {tooLong && (
+        <p role="alert" className="text-sm text-red-600 dark:text-red-400">
+          That is too much code to scan. The limit is{" "}
+          {MAX_CODE_LENGTH.toLocaleString("en-US")} characters.
+        </p>
+      )}
 
       {error && (
         <p role="alert" className="text-sm text-red-600 dark:text-red-400">
@@ -96,6 +120,14 @@ export default function Scanner() {
           <p aria-live="polite" className="font-medium">
             {summaryText(result.findings)}
           </p>
+          {result.errors.length > 0 && (
+            <p
+              role="alert"
+              className="rounded-md border border-red-300 bg-red-50 p-3 text-sm text-red-900 dark:border-red-800 dark:bg-red-950 dark:text-red-200"
+            >
+              Part of the scan could not run: {result.errors.join(" ")}
+            </p>
+          )}
           {aiNotice(result) && (
             <p
               role="status"
