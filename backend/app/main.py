@@ -1,4 +1,5 @@
 from fastapi import FastAPI, HTTPException
+from fastapi.middleware.cors import CORSMiddleware
 
 from app.config import get_settings
 from app.explainer import ExplanationError, explain_findings
@@ -9,6 +10,14 @@ app = FastAPI(
     title="AI Code Security Reviewer",
     description="Scans source code for security problems and explains them with AI.",
     version="0.1.0",
+)
+
+# Only the listed websites may call the API from a browser.
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=list(get_settings().allowed_origins),
+    allow_methods=["GET", "POST"],
+    allow_headers=["Content-Type"],
 )
 
 
