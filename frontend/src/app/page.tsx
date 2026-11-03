@@ -1,3 +1,5 @@
+import Scanner from "@/components/Scanner";
+
 export default function Home() {
   return (
     <main className="mx-auto w-full max-w-4xl flex-1 px-4 py-12">
@@ -7,6 +9,9 @@ export default function Home() {
       <p className="mt-2 text-zinc-600 dark:text-zinc-400">
         Paste code, find security problems, and get plain-language fixes.
       </p>
+      <div className="mt-8">
+        <Scanner />
+      </div>
     </main>
   );
 }
