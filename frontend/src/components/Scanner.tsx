@@ -2,7 +2,9 @@
 
 import { useState } from "react";
 
+import FindingCard from "@/components/FindingCard";
 import { ScanError, scanCode } from "@/lib/api";
+import { sortBySeverity, summaryText } from "@/lib/summary";
 import type { Language, ScanResult } from "@/lib/types";
 
 const LANGUAGES: { value: Language; label: string }[] = [
@@ -89,13 +91,18 @@ export default function Scanner() {
         </p>
       )}
 
-      {/* Temporary summary. The finding cards come in the next commit. */}
       {result && (
-        <p aria-live="polite" className="text-sm">
-          {result.findings.length === 0
-            ? "No problems found."
-            : `Found ${result.findings.length} problem(s).`}
-        </p>
+        <div className="space-y-3 pt-2">
+          <p aria-live="polite" className="font-medium">
+            {summaryText(result.findings)}
+          </p>
+          {sortBySeverity(result.findings).map((finding, index) => (
+            <FindingCard
+              key={`${finding.rule_id}-${finding.line}-${index}`}
+              finding={finding}
+            />
+          ))}
+        </div>
       )}
     </section>
   );
