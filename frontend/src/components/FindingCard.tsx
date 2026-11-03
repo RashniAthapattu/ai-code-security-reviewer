@@ -49,6 +49,33 @@ export default function FindingCard({ finding }: { finding: Finding }) {
         {finding.snippet}
       </pre>
 
+      {finding.explanation && (
+        <div className="mt-4 space-y-2 rounded-md border border-violet-200 bg-violet-50 p-3 text-sm dark:border-violet-900 dark:bg-violet-950/40">
+          <p className="text-xs font-semibold uppercase text-violet-700 dark:text-violet-300">
+            AI explanation
+          </p>
+          {finding.explanation.false_positive_likely && (
+            <p className="font-medium text-emerald-700 dark:text-emerald-400">
+              The AI thinks this may be a false alarm.
+            </p>
+          )}
+          <p>
+            <span className="font-medium">What: </span>
+            {finding.explanation.summary}
+          </p>
+          <p>
+            <span className="font-medium">Risk: </span>
+            {finding.explanation.risk}
+          </p>
+          <div>
+            <p className="font-medium">Suggested fix</p>
+            <pre className="mt-1 overflow-x-auto whitespace-pre-wrap rounded-md bg-white p-3 font-mono text-xs dark:bg-zinc-950">
+              {finding.explanation.fix}
+            </pre>
+          </div>
+        </div>
+      )}
+
       {link && (
         <a
           href={link}

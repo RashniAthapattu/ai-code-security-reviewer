@@ -4,7 +4,7 @@ import { useState } from "react";
 
 import FindingCard from "@/components/FindingCard";
 import { ScanError, scanCode } from "@/lib/api";
-import { sortBySeverity, summaryText } from "@/lib/summary";
+import { aiNotice, sortBySeverity, summaryText } from "@/lib/summary";
 import type { Language, ScanResult } from "@/lib/types";
 
 const LANGUAGES: { value: Language; label: string }[] = [
@@ -96,6 +96,14 @@ export default function Scanner() {
           <p aria-live="polite" className="font-medium">
             {summaryText(result.findings)}
           </p>
+          {aiNotice(result) && (
+            <p
+              role="status"
+              className="rounded-md border border-amber-300 bg-amber-50 p-3 text-sm text-amber-900 dark:border-amber-800 dark:bg-amber-950 dark:text-amber-200"
+            >
+              {aiNotice(result)}
+            </p>
+          )}
           {sortBySeverity(result.findings).map((finding, index) => (
             <FindingCard
               key={`${finding.rule_id}-${finding.line}-${index}`}

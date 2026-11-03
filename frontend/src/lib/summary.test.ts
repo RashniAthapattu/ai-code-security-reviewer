@@ -1,7 +1,12 @@
 import { describe, expect, it } from "vitest";
 
-import { countBySeverity, sortBySeverity, summaryText } from "./summary";
-import type { Finding, Severity } from "./types";
+import {
+  aiNotice,
+  countBySeverity,
+  sortBySeverity,
+  summaryText,
+} from "./summary";
+import type { AIStatus, Finding, ScanResult, Severity } from "./types";
 
 function finding(severity: Severity, line: number): Finding {
   return {
@@ -52,5 +57,36 @@ describe("summary", () => {
       "medium:2",
       "low:1",
     ]);
+  });
+});
+
+function scanResult(ai_status: AIStatus, ai_message: string | null): ScanResult {
+  return { findings: [], errors: [], ai_status, ai_message };
+}
+
+describe("aiNotice", () => {
+  it("is empty when AI was not needed or worked", () => {
+    expect(aiNotice(scanResult("not_requested", null))).toBeNull();
+    expect(aiNotice(scanResult("ok", null))).toBeNull();
+  });
+
+  it("explains why AI is missing and that the scan is still valid", () => {
+    expect(
+      aiNotice(scanResult("disabled", "AI explanations are not configured")),
+    ).toBe(
+      "AI explanations are not configured. The scan results below are still valid.",
+    );
+  });
+
+  it("does not double the full stop", () => {
+    expect(aiNotice(scanResult("unavailable", "The AI service failed."))).toBe(
+      "The AI service failed. The scan results below are still valid.",
+    );
+  });
+
+  it("has a fallback message", () => {
+    expect(aiNotice(scanResult("unavailable", null))).toContain(
+      "not available",
+    );
   });
 });
