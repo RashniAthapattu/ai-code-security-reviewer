@@ -1,10 +1,12 @@
 # AI Code Security Reviewer
 
+[![CI](https://github.com/RashniAthapattu/ai-code-security-reviewer/actions/workflows/ci.yml/badge.svg)](https://github.com/RashniAthapattu/ai-code-security-reviewer/actions/workflows/ci.yml)
+
 A web app that scans source code for security problems and uses AI to explain each one in plain language and suggest a fix.
 
 Paste Python, JavaScript or TypeScript, press **Scan**, and get colour-coded findings. Tick **Explain with AI** to see what each problem means, how it could be abused, and a suggested fix.
 
-> **Status:** work in progress. CI and a live demo link are still to come.
+> **Status:** work in progress. A live demo link and screenshots are still to come.
 
 ## Features
 
