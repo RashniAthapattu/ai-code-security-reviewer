@@ -42,9 +42,10 @@ jobs:
           cache-dependency-path: frontend/package-lock.json
       - run: npm ci
       - run: npm run lint
-      - run: npx tsc --noEmit
       - run: npm test
+      # The build also generates the route types that the type check needs.
       - run: npm run build
+      - run: npx tsc --noEmit
 
   docker:
     name: Backend image builds
