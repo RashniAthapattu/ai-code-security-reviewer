@@ -6,7 +6,13 @@ A web app that scans source code for security problems and uses AI to explain ea
 
 Paste Python, JavaScript or TypeScript, press **Scan**, and get colour-coded findings. Tick **Explain with AI** to see what each problem means, how it could be abused, and a suggested fix.
 
-> **Status:** work in progress. A live demo link and screenshots are still to come.
+## Screenshots
+
+Scanning the built-in Python example (light and dark mode follow your device):
+
+![Scan results in light mode](docs/screenshots/scan-light.png)
+
+![Scan results in dark mode](docs/screenshots/scan-dark.png)
 
 ## Features
 
@@ -86,9 +92,9 @@ cd backend && pytest        # scanners, API, AI layer (AI calls are mocked)
 cd frontend && npm test     # API client and helpers
 ```
 
-## Deploy a live demo
+## Host it yourself
 
-The website runs on Vercel and the API runs on Fly.io.
+To put it online, the website can run on Vercel and the API on Fly.io.
 
 **1. API on Fly.io**
 
