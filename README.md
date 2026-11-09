@@ -30,6 +30,7 @@ Scanning the built-in Python example (light and dark mode follow your device):
 | AI       | Anthropic Claude API |
 | Frontend | Next.js, TypeScript, Tailwind CSS |
 | Tests    | pytest, Vitest, Ruff |
+| Deploy   | Docker, Kubernetes (kind), GitHub Actions |
 
 ## Run it locally
 
@@ -92,6 +93,47 @@ cd backend && pytest        # scanners, API, AI layer (AI calls are mocked)
 cd frontend && npm test     # API client and helpers
 ```
 
+## Run it on Kubernetes
+
+The `k8s/` folder runs the API and the website on a local Kubernetes cluster. You need Docker, [kind](https://kind.sigs.k8s.io/) and `kubectl`.
+
+```bash
+# 1. Make a small cluster inside Docker
+kind create cluster --name reviewer
+
+# 2. Build the two images and load them into the cluster
+docker build -t ai-code-security-reviewer-api:local backend
+docker build -t ai-code-security-reviewer-web:local frontend
+kind load docker-image ai-code-security-reviewer-api:local ai-code-security-reviewer-web:local --name reviewer
+
+# 3. Start the app and wait until all pods show 1/1 Running
+kubectl apply -f k8s/
+kubectl get pods -n security-reviewer --watch
+```
+
+Then forward the two Services to your computer, each in its own terminal:
+
+```bash
+kubectl port-forward -n security-reviewer service/backend 8000:8000
+kubectl port-forward -n security-reviewer service/frontend 3000:3000
+```
+
+Open http://localhost:3000. To remove everything, run `kind delete cluster --name reviewer`.
+
+**What is in `k8s/`**
+
+- A Deployment for each part keeps 2 copies running and replaces any that crash. A readiness check sends traffic only to copies that answer `/health`, and a liveness check restarts copies that stop answering.
+- A Service for each part gives its copies one stable address inside the cluster.
+- `configmap.yaml` holds the backend settings (see the settings table above).
+- AI explanations are optional. To turn them on, create the Secret from your terminal, then restart the backend. The key never goes into a file in git (`k8s/examples/secret.yaml` is only a template):
+
+```bash
+kubectl create secret generic backend-secret -n security-reviewer --from-literal=ANTHROPIC_API_KEY=your-key-here
+kubectl rollout restart deployment/backend -n security-reviewer
+```
+
+The website address of the API is fixed when the image is built (`NEXT_PUBLIC_API_URL`, default `http://localhost:8000`), so the port-forward above must use port 8000.
+
 ## Host it yourself
 
 To put it online, the website can run on Vercel and the API on Fly.io.
@@ -131,5 +173,6 @@ Then open `https://<your-app>.fly.dev/health`. It should show `{"status":"ok"}`.
 
 ```
 backend/    FastAPI app, scanners, AI explainer, Dockerfile, Fly.io setup, tests
-frontend/   Next.js website
+frontend/   Next.js website, Dockerfile
+k8s/        Kubernetes manifests
 ```
