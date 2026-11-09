@@ -1,0 +1,11 @@
+# Normal (non-secret) settings for the backend, passed in as environment variables.
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: backend-config
+  namespace: security-reviewer
+data:
+  # The website address that is allowed to call the API.
+  ALLOWED_ORIGINS: "http://localhost:3000"
+  RATE_LIMIT_PER_HOUR: "60"
+  AI_RATE_LIMIT_PER_HOUR: "10"

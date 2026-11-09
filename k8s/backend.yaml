@@ -1,0 +1,61 @@
+# Deployment: "keep 2 copies of the backend running, and replace any that crash".
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: backend
+  namespace: security-reviewer
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: backend
+  template:
+    metadata:
+      labels:
+        app: backend
+    spec:
+      containers:
+        - name: backend
+          image: ai-code-security-reviewer-api:local
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 8000
+          envFrom:
+            - configMapRef:
+                name: backend-config
+            - secretRef:
+                name: backend-secret
+                optional: true # the app works without an API key
+          # Readiness: only send traffic to a copy once /health answers.
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 8000
+            initialDelaySeconds: 3
+            periodSeconds: 5
+          # Liveness: restart a copy that stops answering.
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 8000
+            initialDelaySeconds: 10
+            periodSeconds: 10
+          resources:
+            requests:
+              cpu: 100m
+              memory: 256Mi
+            limits:
+              memory: 512Mi
+---
+# Service: one stable address that spreads traffic across the backend copies.
+apiVersion: v1
+kind: Service
+metadata:
+  name: backend
+  namespace: security-reviewer
+spec:
+  selector:
+    app: backend
+  ports:
+    - port: 8000
+      targetPort: 8000
